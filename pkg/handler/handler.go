@@ -11,9 +11,8 @@ type Handler interface {
 	HandleMessage(ctx context.Context, msg Message)
 	RegisterEvent() error
 	GetEvent() <-chan sdk.Event
-	RegisterTxHandleFunc(trancode string, handleFunc TxHandleFunc) error
-	RegisterSrcHandlerFunc(trancode string, handleFunc SrcHandleFunc) error
-	RegisterLedgerHandlerFunc(trancode string, handleFunc LedgerHandleFunc) error
+	RegisterTxHandleFunc(trancode TranCode, handleFunc TxHandleFunc) error
+	RegisterSrcHandlerFunc(trancode TranCode, handleFunc SrcHandleFunc) error
 }
 
 // TxHandleFunc transaction handle function
@@ -21,6 +20,3 @@ type TxHandleFunc func(msg Message, handler sdk.TxHandler)
 
 // SrcHandleFunc resource management handle function
 type SrcHandleFunc func(msg Message, handler sdk.ResourceManager)
-
-// LedgerHandleFunc ledger resource  management handle function
-type LedgerHandleFunc func(msg Message, handler sdk.LedgerQueryer)

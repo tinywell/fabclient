@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tinywell/fabclient/pkg/sdk"
 )
@@ -11,8 +12,10 @@ type Impl struct {
 	msgs          chan Message
 	events        chan sdk.Event
 	txHandler     sdk.TxHandler
-	txHandlers    map[string]TxHandleFunc
-	tranCodeStore map[string]HandlerType
+	txHandlers    map[TranCode]TxHandleFunc
+	srcHandler    sdk.ResourceManager
+	srcHandlers   map[TranCode]SrcHandleFunc
+	tranCodeStore map[TranCode]TranType
 	doneC         chan struct{}
 	// logger
 }
@@ -28,8 +31,8 @@ func NewHandler(core Core) (*Impl, error) {
 	h := &Impl{
 		msgs:          make(chan Message, 100),
 		txHandler:     core.TxHandler,
-		txHandlers:    make(map[string]TxHandleFunc),
-		tranCodeStore: make(map[string]HandlerType),
+		txHandlers:    make(map[TranCode]TxHandleFunc),
+		tranCodeStore: make(map[TranCode]TranType),
 		doneC:         make(chan struct{}),
 	}
 	go h.server()
@@ -39,7 +42,36 @@ func NewHandler(core Core) (*Impl, error) {
 func (h *Impl) server() {
 	for {
 		select {
-		case _ = <-h.msgs:
+		case msg := <-h.msgs:
+			trancode := msg.TranCode
+			handlerType, ok := h.tranCodeStore[trancode]
+			if !ok {
+				// trancode not support,return error msg
+				continue
+			}
+
+			switch handlerType {
+			case TypeTxHandler:
+				if h.txHandler == nil {
+					panic(fmt.Errorf("TxHandler not set"))
+				}
+				hfunc, ok := h.txHandlers[trancode]
+				if !ok {
+					// should not hanppen
+
+				}
+				hfunc(msg, h.txHandler)
+			case TypeSrcHandler:
+				if h.txHandler == nil {
+					panic(fmt.Errorf("SrcManager not set"))
+				}
+				hfunc, ok := h.srcHandlers[trancode]
+				if !ok {
+					// should not hanppen
+
+				}
+				hfunc(msg, h.srcHandler)
+			}
 		case <-h.doneC:
 			return
 		}
@@ -51,7 +83,7 @@ func (h *Impl) HandleMessage(ctx context.Context, msg Message) {
 	select {
 	case h.msgs <- msg:
 	case <-ctx.Done():
-
+		return
 	}
 }
 
@@ -66,16 +98,17 @@ func (h *Impl) GetEvent() <-chan sdk.Event {
 }
 
 // RegisterTxHandleFunc register TxHandleFunc
-func (h *Impl) RegisterTxHandleFunc(trancode string, handleFunc TxHandleFunc) error {
+func (h *Impl) RegisterTxHandleFunc(trancode TranCode, handleFunc TxHandleFunc) error {
+	if _, ok := h.txHandlers[trancode]; ok {
+		// already exist
+		return nil
+	}
+	h.txHandlers[trancode] = handleFunc
 	return nil
 }
 
 // RegisterSrcHandlerFunc register SrcHandlerFunc
-func (h *Impl) RegisterSrcHandlerFunc(trancode string, handleFunc SrcHandleFunc) error {
-	return nil
-}
+func (h *Impl) RegisterSrcHandlerFunc(trancode TranCode, handleFunc SrcHandleFunc) error {
 
-// RegisterLedgerHandlerFunc register  LedgerHandlerFunc
-func (h *Impl) RegisterLedgerHandlerFunc(trancode string, handleFunc LedgerHandleFunc) error {
 	return nil
 }

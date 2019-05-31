@@ -4,10 +4,6 @@ package sdk
 type TxHandler interface {
 	Excute()
 	Query()
-}
-
-// EventHandler fabric event handler
-type EventHandler interface {
 	RegisterEvent()
 }
 
@@ -19,6 +15,7 @@ type ResourceManager interface {
 	InstallChaincode()
 	InstantiateChaincode()
 	UpgradeChaincode()
+	LedgerQueryer
 }
 
 // LedgerQueryer fabric ledger queryer,block、chain info .etc
