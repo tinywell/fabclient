@@ -12,8 +12,8 @@ type Handler interface {
 	RegisterEvent() error
 	GetEvent() <-chan sdk.Event
 	RegisterTxHandleFunc(trancode string, handleFunc TxHandleFunc) error
-	RegisterSrcHandlerFcun(trancode string, handleFunc SrcHandleFunc) error
-	RegisterLedgerHandlerFcun(trancode string, handleFunc LedgerHandleFunc) error
+	RegisterSrcHandlerFunc(trancode string, handleFunc SrcHandleFunc) error
+	RegisterLedgerHandlerFunc(trancode string, handleFunc LedgerHandleFunc) error
 }
 
 // TxHandleFunc transaction handle function
