@@ -3,16 +3,6 @@ package handler
 // TranCode transaction code
 type TranCode string
 
-// RspCode response code
-type RspCode uint32
-
-// response code
-const (
-	RspSuccess     RspCode = 200 // RspSuccess transaction success
-	RspServerError RspCode = 500 // RspServerError internal server error
-	RspTimeout     RspCode = 502 // RspTimeout transaction timeout ,check if block ok
-)
-
 // Message message for handler, result will be return throw channel Result
 type Message struct {
 	// ...

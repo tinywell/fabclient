@@ -2,9 +2,9 @@ package sdk
 
 // TxHandler fabric transaction handler
 type TxHandler interface {
-	Excute()
-	Query()
-	RegisterEvent()
+	Excute(channel, chaincode, fcn string, args [][]byte) RspMsg
+	Query(channel, chaincode, fcn string, args [][]byte) RspMsg
+	RegisterEvent(channel, ccName, event string) <-chan *Event
 }
 
 // ResourceManager fabric resource manager,channel、chaincode etc.

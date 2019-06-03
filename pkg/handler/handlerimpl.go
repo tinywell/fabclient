@@ -22,7 +22,8 @@ type Impl struct {
 
 // Core core parameters for handler Impl
 type Core struct {
-	TxHandler sdk.TxHandler
+	TxHandler  sdk.TxHandler
+	SrcManager sdk.ResourceManager
 	// ...
 }
 
@@ -32,6 +33,8 @@ func NewHandler(core Core) (*Impl, error) {
 		msgs:          make(chan Message, 100),
 		txHandler:     core.TxHandler,
 		txHandlers:    make(map[TranCode]TxHandleFunc),
+		srcHandler:    core.SrcManager,
+		srcHandlers:   make(map[TranCode]SrcHandleFunc),
 		tranCodeStore: make(map[TranCode]TranType),
 		doneC:         make(chan struct{}),
 	}
@@ -87,8 +90,14 @@ func (h *Impl) HandleMessage(ctx context.Context, msg Message) {
 	}
 }
 
-// RegisterEvent register fabric  event,event messger will be boradcast throw channel h.events
-func (h *Impl) RegisterEvent() error {
+// RegisterEvent register fabric event, event messges will be boradcast throw channel h.events
+func (h *Impl) RegisterEvent(channel, ccName string, event string) error {
+	eventChan := h.txHandler.RegisterEvent(channel, ccName, event)
+	go func(event <-chan *sdk.Event) {
+		for e := range event {
+			h.events <- *e
+		}
+	}(eventChan)
 	return nil
 }
 
@@ -109,6 +118,10 @@ func (h *Impl) RegisterTxHandleFunc(trancode TranCode, handleFunc TxHandleFunc) 
 
 // RegisterSrcHandlerFunc register SrcHandlerFunc
 func (h *Impl) RegisterSrcHandlerFunc(trancode TranCode, handleFunc SrcHandleFunc) error {
-
+	if _, ok := h.srcHandlers[trancode]; ok {
+		// already exist
+		return nil
+	}
+	h.srcHandlers[trancode] = handleFunc
 	return nil
 }

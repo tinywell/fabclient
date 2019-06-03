@@ -8,3 +8,10 @@ type Event struct {
 	BlockNumber uint64
 	Payload     []byte
 }
+
+// RspMsg response message
+type RspMsg struct {
+	Code uint32
+	TxID string
+	Data []byte
+}
