@@ -4,7 +4,8 @@ package sdk
 type TxHandler interface {
 	Excute(channel, chaincode, fcn string, args [][]byte) RspMsg
 	Query(channel, chaincode, fcn string, args [][]byte) RspMsg
-	RegisterEvent(channel, ccName, event string) <-chan *Event
+	RegisterEvent(channel, ccName, event string) (<-chan *Event, error)
+	UnRegisterEvent(channel, ccName, event string) error
 }
 
 // ResourceManager fabric resource manager,channel、chaincode etc.
