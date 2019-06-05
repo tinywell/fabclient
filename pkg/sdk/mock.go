@@ -23,7 +23,12 @@ func (mock *MockTxHandler) Query(channel, chaincode, fcn string, args [][]byte) 
 }
 
 // RegisterEvent mock register chaincode event
-func (mock *MockTxHandler) RegisterEvent(channel, ccName, event string) <-chan *Event {
+func (mock *MockTxHandler) RegisterEvent(channel, ccName, event string) (<-chan *Event, error) {
+	return nil, nil
+}
+
+// UnRegisterEvent mock register chaincode event
+func (mock *MockTxHandler) UnRegisterEvent(channel, ccName, event string) error {
 	return nil
 }
 

@@ -44,7 +44,7 @@ type Params struct {
 }
 
 // NewHandler return new Impl
-func NewHandler(core Core, param Params) (*Impl, error) {
+func NewHandler(core Core, param Params) *Impl {
 	if param.PoolSize == 0 {
 		param.PoolSize = defaultParams.PoolSize
 	}
@@ -64,7 +64,7 @@ func NewHandler(core Core, param Params) (*Impl, error) {
 		pool:          make(chan struct{}, param.PoolSize),
 	}
 	go h.server()
-	return h, nil
+	return h
 }
 
 func (h *Impl) server() {

@@ -1,5 +1,6 @@
 # vs code
 .vscode
+.VSCodeCounter
 
 # Binaries for programs and plugins
 *.exe

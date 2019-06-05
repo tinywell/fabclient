@@ -37,11 +37,13 @@ type RestServer struct {
 // return:
 //   - RestServer  RESTful接口对象
 func NewServer(addr string) *RestServer {
-	return &RestServer{
+	server := &RestServer{
 		addr:   addr,
 		router: httprouter.New(),
 		msgs:   make(chan handler.Message),
 	}
+	server.run()
+	return server
 }
 
 // ReceiveMessage return messager channel

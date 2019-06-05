@@ -14,7 +14,7 @@ type Message struct {
 // Result handle result
 type Result struct {
 	RspCode  uint32
-	RepData  []byte
+	RspData  []byte
 	TranCode TranCode
 	TxID     string
 	Err      error
