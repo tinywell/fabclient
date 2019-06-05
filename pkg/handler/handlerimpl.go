@@ -72,14 +72,14 @@ func (h *Impl) server() {
 		select {
 		case msg := <-h.msgs:
 			h.pool <- struct{}{}
-			go h.handler(msg)
+			go h.handle(msg)
 		case <-h.doneC:
 			return
 		}
 	}
 }
 
-func (h *Impl) handler(msg Message) {
+func (h *Impl) handle(msg Message) {
 	defer func() {
 		<-h.pool
 	}()
