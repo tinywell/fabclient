@@ -54,6 +54,7 @@ func NewHandler(core Core, param Params) *Impl {
 
 	h := &Impl{
 		msgs:          make(chan Message),
+		events:        make(chan sdk.Event),
 		txHandler:     core.TxHandler,
 		txHandlers:    make(map[TranCode]TxHandleFunc),
 		srcHandler:    core.SrcManager,
@@ -87,6 +88,7 @@ func (h *Impl) handle(msg Message) {
 	handlerType, ok := h.tranCodeStore[trancode]
 	if !ok {
 		// trancode not support,return error msg
+		fmt.Println("trancode not support,return error msg")
 		return
 	}
 	ctx, cancelFunc := context.WithTimeout(context.Background(), h.timeOut)
@@ -147,9 +149,10 @@ func (h *Impl) GetEvent() <-chan sdk.Event {
 func (h *Impl) RegisterTxHandleFunc(trancode TranCode, handleFunc TxHandleFunc) error {
 	if _, ok := h.txHandlers[trancode]; ok {
 		// already exist
-		return nil
+		return fmt.Errorf("trancode %s already exist", trancode)
 	}
 	h.txHandlers[trancode] = handleFunc
+	h.tranCodeStore[trancode] = TypeTxHandler
 	return nil
 }
 
@@ -157,8 +160,9 @@ func (h *Impl) RegisterTxHandleFunc(trancode TranCode, handleFunc TxHandleFunc) 
 func (h *Impl) RegisterSrcHandlerFunc(trancode TranCode, handleFunc SrcHandleFunc) error {
 	if _, ok := h.srcHandlers[trancode]; ok {
 		// already exist
-		return nil
+		return fmt.Errorf("trancode %s already exist", trancode)
 	}
 	h.srcHandlers[trancode] = handleFunc
+	h.tranCodeStore[trancode] = TypeSrcHandler
 	return nil
 }
