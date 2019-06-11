@@ -2,6 +2,9 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+
+	"github.com/tinywell/fabclient/pkg/common"
 
 	core "github.com/tinywell/fabclient/pkg/handler"
 	"github.com/tinywell/fabclient/pkg/sdk"
@@ -14,6 +17,12 @@ type ExpHandler struct {
 	user      string
 }
 
+// PutKey param for putkey
+type PutKey struct {
+	Name string
+	Key  string
+}
+
 // CreateHandler return new example handler
 func CreateHandler(channel, chaincode, user string) *ExpHandler {
 	return &ExpHandler{
@@ -24,25 +33,32 @@ func CreateHandler(channel, chaincode, user string) *ExpHandler {
 }
 
 // SaveData handler save data,trancode is 'EXP100'
-func (h *ExpHandler) SaveData(ctx context.Context, msg core.Message, handler sdk.TxHandler) {
-	rspmsg := handler.Excute(h.channel, h.chaincode, "savedata", [][]byte{msg.TranData})
-	rst := core.Result{
+func (h *ExpHandler) SaveData(ctx context.Context, msg core.Message, handler sdk.TxHandler) core.Result {
+	putkey := &PutKey{}
+	err := json.Unmarshal(msg.TranData, putkey)
+	if err != nil {
+		return core.Result{
+			RspCode:  common.RspServerError,
+			RspData:  []byte(err.Error()),
+			TranCode: msg.TranCode,
+		}
+	}
+	rspmsg := handler.Excute(h.channel, h.chaincode, "keyadd", [][]byte{[]byte(putkey.Name), []byte(putkey.Key)})
+	return core.Result{
 		RspCode:  rspmsg.Code,
 		RspData:  rspmsg.Data,
 		TranCode: msg.TranCode,
 		TxID:     rspmsg.TxID,
 	}
-	msg.Result <- rst
 }
 
 // ReadData handler read data,trancode is 'EXP200'
-func (h *ExpHandler) ReadData(ctx context.Context, msg core.Message, handler sdk.TxHandler) {
-	rspmsg := handler.Excute(h.channel, h.chaincode, "readdata", [][]byte{msg.TranData})
-	rst := core.Result{
+func (h *ExpHandler) ReadData(ctx context.Context, msg core.Message, handler sdk.TxHandler) core.Result {
+	rspmsg := handler.Excute(h.channel, h.chaincode, "keyget", [][]byte{msg.TranData})
+	return core.Result{
 		RspCode:  rspmsg.Code,
 		RspData:  rspmsg.Data,
 		TranCode: msg.TranCode,
 		TxID:     rspmsg.TxID,
 	}
-	msg.Result <- rst
 }

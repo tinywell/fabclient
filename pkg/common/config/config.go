@@ -36,6 +36,17 @@ func InitConfig(configfile string) {
 	}
 }
 
+// GetSDKConfig return sdk config file path
 func GetSDKConfig() string {
 	return myViper.GetString("client.sdkconfig")
+}
+
+// GetMspID return client mspid
+func GetMspID() string {
+	return myViper.GetString("client.sdk.mspid")
+}
+
+// GetOrgName return org name
+func GetOrgName() string {
+	return myViper.GetString("client.sdk.org")
 }

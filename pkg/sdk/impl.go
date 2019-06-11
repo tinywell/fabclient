@@ -11,6 +11,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fab/events/deliverclient/seek"
 	"github.com/hyperledger/fabric-sdk-go/pkg/fabsdk"
+	"github.com/hyperledger/fabric-sdk-go/pkg/util/pathvar"
 
 	"github.com/tinywell/fabclient/pkg/common"
 )
@@ -32,17 +33,17 @@ type eventWrapper struct {
 // UserContext user context for the sdk
 type UserContext struct {
 	UserName string
-	MSPID    string
+	Org      string
 }
 
 // NewSDK return new GoSDK
-func NewSDK(configPath string, userCtx UserContext) *GoSDK {
-	cfg := config.FromFile(configPath)
+func NewSDK(configPath string, userCtx UserContext) (*GoSDK, error) {
+	cfg := config.FromFile(pathvar.Subst(configPath))
 	// logprovider := &log.LogProvider{}
 	// sdk, err := fabsdk.New(cfg, fabsdk.WithLoggerPkg(logprovider))
 	sdk, err := fabsdk.New(cfg)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	service := &GoSDK{
 		sdk:       sdk,
@@ -50,7 +51,7 @@ func NewSDK(configPath string, userCtx UserContext) *GoSDK {
 		eventRegs: make(map[string]eventWrapper),
 		userCtx:   userCtx,
 	}
-	return service
+	return service, nil
 }
 
 // Excute chaincode execution
@@ -111,7 +112,7 @@ func (s *GoSDK) RegisterEvent(channel, ccName, eventName string) (<-chan *Event,
 		return nil, fmt.Errorf("event %s already registered", eventName)
 	}
 	context := s.sdk.ChannelContext(channel,
-		fabsdk.WithUser(s.userCtx.UserName), fabsdk.WithOrg(s.userCtx.MSPID))
+		fabsdk.WithUser(s.userCtx.UserName), fabsdk.WithOrg(s.userCtx.Org))
 	client, err := event.New(context, event.WithBlockEvents(), event.WithSeekType(seek.Newest))
 	reg, notifier, err := client.RegisterChaincodeEvent(ccName, eventName)
 	if err != nil {
@@ -130,7 +131,7 @@ func (s *GoSDK) UnRegisterEvent(channel, ccName, eventName string) error {
 		return fmt.Errorf("This event had not registed")
 	}
 	context := s.sdk.ChannelContext(channel,
-		fabsdk.WithUser(s.userCtx.UserName), fabsdk.WithOrg(s.userCtx.MSPID))
+		fabsdk.WithUser(s.userCtx.UserName), fabsdk.WithOrg(s.userCtx.Org))
 	client, err := event.New(context, event.WithBlockEvents())
 	if err != nil {
 		return err
@@ -149,15 +150,16 @@ func (s *GoSDK) getClient(channelID string) *channel.Client {
 	if ok {
 		return client
 	}
+	s.chMutex.Lock()
+	defer s.chMutex.Unlock()
 	context := s.sdk.ChannelContext(channelID,
-		fabsdk.WithUser(s.userCtx.UserName), fabsdk.WithOrg(s.userCtx.MSPID))
+		fabsdk.WithUser(s.userCtx.UserName),
+		fabsdk.WithOrg(s.userCtx.Org))
 	client, err := channel.New(context)
 	if err != nil {
 		panic(err)
 	}
-	s.chMutex.Lock()
 	s.chclients[channelID] = client
-	s.chMutex.Unlock()
 	return client
 }
 

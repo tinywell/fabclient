@@ -4,9 +4,10 @@ version: 1.0.0
 # The client section used by GO SDK.
 #
 client:
-  sdkconfig: ./config_e2e.yaml
+  sdkconfig: ./configs/config_e2e.yaml
   poolsize: 200
 
-  sdK:
+  sdk:
     mspid: MspOrg1
+    org: org1
 

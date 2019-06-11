@@ -2,11 +2,12 @@ package handler
 
 import (
 	"context"
-	"github.com/golang/mock/gomock"
-	"github.com/tinywell/fabclient/pkg/sdk"
-	"github.com/tinywell/fabclient/test/mocks/sdk"
 	"testing"
 	"time"
+
+	"github.com/golang/mock/gomock"
+	"github.com/tinywell/fabclient/pkg/sdk"
+	msdk "github.com/tinywell/fabclient/test/mocks/sdk"
 )
 
 var (
@@ -16,8 +17,8 @@ var (
 
 func TestRegisterTxHandleFunc(t *testing.T) {
 	h := createHandler(t)
-	txHF := func(ctx context.Context, msg Message, handler sdk.TxHandler) {
-
+	txHF := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
+		return Result{}
 	}
 	err := h.RegisterTxHandleFunc("TEST001", txHF)
 	if err != nil {
@@ -27,8 +28,8 @@ func TestRegisterTxHandleFunc(t *testing.T) {
 
 func TestRegisterSrcHandlerFunc(t *testing.T) {
 	h := createHandler(t)
-	srcHF := func(ctx context.Context, msg Message, handler sdk.ResourceManager) {
-
+	srcHF := func(ctx context.Context, msg Message, handler sdk.ResourceManager) Result {
+		return Result{}
 	}
 	err := h.RegisterSrcHandlerFunc("TEST101", srcHF)
 	if err != nil {
@@ -69,15 +70,14 @@ func TestHandleMessage(t *testing.T) {
 		PoolSize:  100,
 	}
 	h := NewHandler(core, params)
-	txHF1 := func(ctx context.Context, msg Message, handler sdk.TxHandler) {
+	txHF1 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
 		rsp := handler.Excute(testChannel, testCC, "savedata", [][]byte{msg.TranData})
-		rst := Result{
+		return Result{
 			RspCode:  200,
 			RspData:  rsp.Data,
 			TranCode: msg.TranCode,
 			TxID:     rsp.TxID,
 		}
-		msg.Result <- rst
 	}
 	err := h.RegisterTxHandleFunc("TEST002", txHF1)
 	if err != nil {
@@ -89,15 +89,14 @@ func TestHandleMessage(t *testing.T) {
 		TranData: []byte("hello world"),
 		Result:   rstC1,
 	}
-	txHF2 := func(ctx context.Context, msg Message, handler sdk.TxHandler) {
+	txHF2 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
 		rsp := handler.Query(testChannel, testCC, "readdata", [][]byte{msg.TranData})
-		rst := Result{
+		return Result{
 			RspCode:  200,
 			RspData:  rsp.Data,
 			TranCode: msg.TranCode,
 			TxID:     rsp.TxID,
 		}
-		msg.Result <- rst
 	}
 	err = h.RegisterTxHandleFunc("TEST102", txHF2)
 	if err != nil {

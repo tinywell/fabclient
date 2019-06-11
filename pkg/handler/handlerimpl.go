@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/tinywell/fabclient/pkg/common"
 	"github.com/tinywell/fabclient/pkg/sdk"
 )
 
@@ -84,11 +85,18 @@ func (h *Impl) handle(msg Message) {
 	defer func() {
 		<-h.pool
 	}()
+	var rst Result
 	trancode := msg.TranCode
 	handlerType, ok := h.tranCodeStore[trancode]
 	if !ok {
 		// trancode not support,return error msg
 		fmt.Println("trancode not support,return error msg")
+		rst = Result{
+			RspCode:  common.RspServerError,
+			RspData:  []byte("trancode not support"),
+			TranCode: msg.TranCode,
+		}
+		msg.Result <- rst
 		return
 	}
 	ctx, cancelFunc := context.WithTimeout(context.Background(), h.timeOut)
@@ -103,7 +111,7 @@ func (h *Impl) handle(msg Message) {
 			// should not hanppen
 			return
 		}
-		hfunc(ctx, msg, h.txHandler)
+		rst = hfunc(ctx, msg, h.txHandler)
 	case TypeSrcHandler:
 		if h.srcHandler == nil {
 			panic(fmt.Errorf("SrcManager not set"))
@@ -113,8 +121,9 @@ func (h *Impl) handle(msg Message) {
 			// should not hanppen
 			return
 		}
-		hfunc(ctx, msg, h.srcHandler)
+		rst = hfunc(ctx, msg, h.srcHandler)
 	}
+	msg.Result <- rst
 }
 
 // HandleMessage handle message

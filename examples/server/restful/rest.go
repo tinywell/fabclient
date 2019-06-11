@@ -62,6 +62,7 @@ func (server *RestServer) run() error {
 		if err != nil {
 			panic(fmt.Errorf("http.ListenAndServe error:%s", err.Error()))
 		}
+		fmt.Printf("server listen at %s\n", server.addr)
 	}()
 
 	return nil
@@ -78,7 +79,7 @@ func (server *RestServer) saveData(w http.ResponseWriter, r *http.Request, param
 	}
 
 	qidata := handler.Message{
-		TranCode: "EXP02",
+		TranCode: "EXP100",
 		TranData: data,
 	}
 
@@ -89,11 +90,11 @@ func (server *RestServer) saveData(w http.ResponseWriter, r *http.Request, param
 // ReadData read tx data
 func (server *RestServer) readData(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	// 获取get请求参数TxId
-	txid := params.ByName("txid")
+	name := params.ByName("key")
 	// 调用交易数据查询接口UnionChainReadData
 	qidata := handler.Message{
-		TranCode: "EXP01",
-		TranData: []byte(txid),
+		TranCode: "EXP200",
+		TranData: []byte(name),
 	}
 	server.waitResponse(w, qidata)
 }
@@ -119,7 +120,8 @@ func (server *RestServer) waitResponse(w http.ResponseWriter, qidata handler.Mes
 	case server.msgs <- qidata:
 	case <-time.After(WaitResponseTimeOut):
 		SendReturn(w, handler.Result{
-			RspCode: common.RspTimeout,
+			RspCode: common.RspServerError,
+			RspData: []byte("send data time out"),
 		})
 		return
 	}
@@ -133,6 +135,7 @@ func (server *RestServer) waitResponse(w http.ResponseWriter, qidata handler.Mes
 	case <-time.After(WaitResponseTimeOut):
 		SendReturn(w, handler.Result{
 			RspCode: common.RspTimeout,
+			RspData: []byte("wait response time out"),
 		})
 		return
 	}

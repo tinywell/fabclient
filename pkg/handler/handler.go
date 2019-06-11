@@ -16,7 +16,7 @@ type Handler interface {
 }
 
 // TxHandleFunc transaction handle function
-type TxHandleFunc func(ctx context.Context, msg Message, handler sdk.TxHandler)
+type TxHandleFunc func(ctx context.Context, msg Message, handler sdk.TxHandler) Result
 
 // SrcHandleFunc resource management handle function
-type SrcHandleFunc func(ctx context.Context, msg Message, handler sdk.ResourceManager)
+type SrcHandleFunc func(ctx context.Context, msg Message, handler sdk.ResourceManager) Result
