@@ -1,1 +1,1 @@
-General Fabric Client library 
+Simple Fabric Client library 
