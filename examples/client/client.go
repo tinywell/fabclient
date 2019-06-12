@@ -28,21 +28,17 @@ func Run(cfg Cfg) {
 		TxHandler:  gosdk,
 		SrcManager: nil,
 	}
-	params := handler.Params{}
-	handler := handler.NewHandler(core, params)
-	expHandler := exphandler.CreateHandler("mychannel", "public", "User1")
-	err = handler.RegisterTxHandleFunc("EXP100", expHandler.SaveData)
+	h := handler.NewHandler(core, handler.Params{})
+	expBox := exphandler.CreateHandler("mychannel", "public", "User1")
+	err = h.FillHandlerFunc(expBox)
 	if err != nil {
-		panic("register handler error")
+		panic("fill handler function error" + err.Error())
 	}
-	err = handler.RegisterTxHandleFunc("EXP200", expHandler.ReadData)
-	if err != nil {
-		panic("register handler error")
-	}
+
 	server := exprest.NewServer(":8000")
 	msgs := server.ReceiveMessage()
 	ctx := context.Background()
 	for msg := range msgs {
-		handler.HandleMessage(ctx, msg)
+		h.HandleMessage(ctx, msg)
 	}
 }

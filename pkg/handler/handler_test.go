@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/tinywell/fabclient/pkg/sdk"
-	msdk "github.com/tinywell/fabclient/test/mocks/sdk"
+	msdk "github.com/tinywell/fabclient/test/mocks/sdk"	
 )
 
 var (
@@ -15,33 +15,41 @@ var (
 	testCC      = "testcc"
 )
 
-func TestRegisterTxHandleFunc(t *testing.T) {
-	h := createHandler(t)
-	txHF := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
-		return Result{}
-	}
-	err := h.RegisterTxHandleFunc("TEST001", txHF)
-	if err != nil {
-		t.Errorf("RegisterTxHandleFunc err: %v", err)
-	}
-}
+// func TestRegisterTxHandleFunc(t *testing.T) {
+// 	h := createHandler(t)
+// 	txHF := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
+// 		return Result{}
+// 	}
+// 	err := h.RegisterTxHandleFunc("TEST001", txHF)
+// 	if err != nil {
+// 		t.Errorf("RegisterTxHandleFunc err: %v", err)
+// 	}
+// }
 
-func TestRegisterSrcHandlerFunc(t *testing.T) {
-	h := createHandler(t)
-	srcHF := func(ctx context.Context, msg Message, handler sdk.ResourceManager) Result {
-		return Result{}
-	}
-	err := h.RegisterSrcHandlerFunc("TEST101", srcHF)
-	if err != nil {
-		t.Errorf("RegisterSrcHandlerFunc err: %v", err)
-	}
-}
+// func TestRegisterSrcHandlerFunc(t *testing.T) {
+// 	h := createHandler(t)
+// 	srcHF := func(ctx context.Context, msg Message, handler sdk.ResourceManager) Result {
+// 		return Result{}
+// 	}
+// 	err := h.RegisterSrcHandlerFunc("TEST101", srcHF)
+// 	if err != nil {
+// 		t.Errorf("RegisterSrcHandlerFunc err: %v", err)
+// 	}
+// }
 
 func TestGetEvent(t *testing.T) {
 	h := createHandler(t)
 	eventC := h.GetEvent()
 	if eventC == nil {
 		t.Error("get event error")
+	}
+}
+
+func TestFillBox(t *testing.T) {
+	h:=createHandler(t)
+	err :=h.FillHandlerFunc(testBox{})
+	if err != nil {
+		t.Error(err)
 	}
 }
 
@@ -70,38 +78,19 @@ func TestHandleMessage(t *testing.T) {
 		PoolSize:  100,
 	}
 	h := NewHandler(core, params)
-	txHF1 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
-		rsp := handler.Excute(testChannel, testCC, "savedata", [][]byte{msg.TranData})
-		return Result{
-			RspCode:  200,
-			RspData:  rsp.Data,
-			TranCode: msg.TranCode,
-			TxID:     rsp.TxID,
-		}
-	}
-	err := h.RegisterTxHandleFunc("TEST002", txHF1)
+	mockBox := testBox{}
+	err := h.FillHandlerFunc(mockBox)
 	if err != nil {
 		t.Error(err)
 	}
+
 	rstC1 := make(chan Result)
 	msg1 := Message{
 		TranCode: "TEST002",
 		TranData: []byte("hello world"),
 		Result:   rstC1,
 	}
-	txHF2 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
-		rsp := handler.Query(testChannel, testCC, "readdata", [][]byte{msg.TranData})
-		return Result{
-			RspCode:  200,
-			RspData:  rsp.Data,
-			TranCode: msg.TranCode,
-			TxID:     rsp.TxID,
-		}
-	}
-	err = h.RegisterTxHandleFunc("TEST102", txHF2)
-	if err != nil {
-		t.Error(err)
-	}
+	
 	rstC2 := make(chan Result)
 	msg2 := Message{
 		TranCode: "TEST102",
@@ -150,4 +139,39 @@ func createHandler(t *testing.T) *Impl {
 	}
 	h := NewHandler(core, params)
 	return h
+}
+
+type testBox struct {
+
+}
+
+func (box testBox) OpenTxHandlerBox() map[TranCode]TxHandleFunc  {
+	boxMap := make(map[TranCode]TxHandleFunc)
+	txHF1 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
+		rsp := handler.Excute(testChannel, testCC, "savedata", [][]byte{msg.TranData})
+		return Result{
+			RspCode:  200,
+			RspData:  rsp.Data,
+			TranCode: msg.TranCode,
+			TxID:     rsp.TxID,
+		}
+	}
+	txHF2 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
+		rsp := handler.Query(testChannel, testCC, "readdata", [][]byte{msg.TranData})
+		return Result{
+			RspCode:  200,
+			RspData:  rsp.Data,
+			TranCode: msg.TranCode,
+			TxID:     rsp.TxID,
+		}
+	}
+	boxMap[TranCode("TEST002")]=txHF1
+	boxMap[TranCode("TEST102")]=txHF2
+	return boxMap
+}
+
+
+func (box testBox) OpenSrcHandlerBox() map[TranCode]SrcHandleFunc  {
+	boxMap := make(map[TranCode]SrcHandleFunc)
+	return boxMap
 }

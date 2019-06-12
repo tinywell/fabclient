@@ -19,8 +19,8 @@ type ExpHandler struct {
 
 // PutKey param for putkey
 type PutKey struct {
-	Name string
-	Key  string
+	Name    string `json:"name,omitempty"`
+	KeyCert string `json:"key_cert,omitempty"`
 }
 
 // CreateHandler return new example handler
@@ -43,7 +43,7 @@ func (h *ExpHandler) SaveData(ctx context.Context, msg core.Message, handler sdk
 			TranCode: msg.TranCode,
 		}
 	}
-	rspmsg := handler.Excute(h.channel, h.chaincode, "keyadd", [][]byte{[]byte(putkey.Name), []byte(putkey.Key)})
+	rspmsg := handler.Excute(h.channel, h.chaincode, "keyadd", [][]byte{[]byte(putkey.Name), []byte(putkey.KeyCert)})
 	return core.Result{
 		RspCode:  rspmsg.Code,
 		RspData:  rspmsg.Data,
@@ -54,11 +54,25 @@ func (h *ExpHandler) SaveData(ctx context.Context, msg core.Message, handler sdk
 
 // ReadData handler read data,trancode is 'EXP200'
 func (h *ExpHandler) ReadData(ctx context.Context, msg core.Message, handler sdk.TxHandler) core.Result {
-	rspmsg := handler.Excute(h.channel, h.chaincode, "keyget", [][]byte{msg.TranData})
+	rspmsg := handler.Query(h.channel, h.chaincode, "keyget", [][]byte{msg.TranData})
 	return core.Result{
 		RspCode:  rspmsg.Code,
 		RspData:  rspmsg.Data,
 		TranCode: msg.TranCode,
 		TxID:     rspmsg.TxID,
 	}
+}
+
+// OpenTxHandlerBox return txhandler functions
+func (h *ExpHandler) OpenTxHandlerBox() map[core.TranCode]core.TxHandleFunc {
+	boxMap := make(map[core.TranCode]core.TxHandleFunc)
+	boxMap[core.TranCode("EXP100")] = h.SaveData
+	boxMap[core.TranCode("EXP200")] = h.ReadData
+	return boxMap
+}
+
+// OpenSrcHandlerBox return src handler functions
+func (h *ExpHandler) OpenSrcHandlerBox() map[core.TranCode]core.SrcHandleFunc {
+	boxMap := make(map[core.TranCode]core.SrcHandleFunc)
+	return boxMap
 }

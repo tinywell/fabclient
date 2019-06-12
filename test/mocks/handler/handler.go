@@ -75,30 +75,67 @@ func (mr *MockHandlerMockRecorder) GetEvent() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEvent", reflect.TypeOf((*MockHandler)(nil).GetEvent))
 }
 
-// RegisterTxHandleFunc mocks base method
-func (m *MockHandler) RegisterTxHandleFunc(trancode handler.TranCode, handleFunc handler.TxHandleFunc) error {
+// FillHandlerFunc mocks base method
+func (m *MockHandler) FillHandlerFunc(box handler.FuncBox) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterTxHandleFunc", trancode, handleFunc)
+	ret := m.ctrl.Call(m, "FillHandlerFunc", box)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// RegisterTxHandleFunc indicates an expected call of RegisterTxHandleFunc
-func (mr *MockHandlerMockRecorder) RegisterTxHandleFunc(trancode, handleFunc interface{}) *gomock.Call {
+// FillHandlerFunc indicates an expected call of FillHandlerFunc
+func (mr *MockHandlerMockRecorder) FillHandlerFunc(box interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterTxHandleFunc", reflect.TypeOf((*MockHandler)(nil).RegisterTxHandleFunc), trancode, handleFunc)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FillHandlerFunc", reflect.TypeOf((*MockHandler)(nil).FillHandlerFunc), box)
 }
 
-// RegisterSrcHandlerFunc mocks base method
-func (m *MockHandler) RegisterSrcHandlerFunc(trancode handler.TranCode, handleFunc handler.SrcHandleFunc) error {
+// MockFuncBox is a mock of FuncBox interface
+type MockFuncBox struct {
+	ctrl     *gomock.Controller
+	recorder *MockFuncBoxMockRecorder
+}
+
+// MockFuncBoxMockRecorder is the mock recorder for MockFuncBox
+type MockFuncBoxMockRecorder struct {
+	mock *MockFuncBox
+}
+
+// NewMockFuncBox creates a new mock instance
+func NewMockFuncBox(ctrl *gomock.Controller) *MockFuncBox {
+	mock := &MockFuncBox{ctrl: ctrl}
+	mock.recorder = &MockFuncBoxMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockFuncBox) EXPECT() *MockFuncBoxMockRecorder {
+	return m.recorder
+}
+
+// OpenTxHandlerBox mocks base method
+func (m *MockFuncBox) OpenTxHandlerBox() map[handler.TranCode]handler.TxHandleFunc {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RegisterSrcHandlerFunc", trancode, handleFunc)
-	ret0, _ := ret[0].(error)
+	ret := m.ctrl.Call(m, "OpenTxHandlerBox")
+	ret0, _ := ret[0].(map[handler.TranCode]handler.TxHandleFunc)
 	return ret0
 }
 
-// RegisterSrcHandlerFunc indicates an expected call of RegisterSrcHandlerFunc
-func (mr *MockHandlerMockRecorder) RegisterSrcHandlerFunc(trancode, handleFunc interface{}) *gomock.Call {
+// OpenTxHandlerBox indicates an expected call of OpenTxHandlerBox
+func (mr *MockFuncBoxMockRecorder) OpenTxHandlerBox() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterSrcHandlerFunc", reflect.TypeOf((*MockHandler)(nil).RegisterSrcHandlerFunc), trancode, handleFunc)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OpenTxHandlerBox", reflect.TypeOf((*MockFuncBox)(nil).OpenTxHandlerBox))
+}
+
+// OpenSrcHandlerBox mocks base method
+func (m *MockFuncBox) OpenSrcHandlerBox() map[handler.TranCode]handler.SrcHandleFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OpenSrcHandlerBox")
+	ret0, _ := ret[0].(map[handler.TranCode]handler.SrcHandleFunc)
+	return ret0
+}
+
+// OpenSrcHandlerBox indicates an expected call of OpenSrcHandlerBox
+func (mr *MockFuncBoxMockRecorder) OpenSrcHandlerBox() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OpenSrcHandlerBox", reflect.TypeOf((*MockFuncBox)(nil).OpenSrcHandlerBox))
 }

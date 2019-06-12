@@ -89,8 +89,9 @@ func (server *RestServer) saveData(w http.ResponseWriter, r *http.Request, param
 
 // ReadData read tx data
 func (server *RestServer) readData(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	// 获取get请求参数TxId
-	name := params.ByName("key")
+	// 获取 get 请求参数 key
+	name := r.FormValue("name")
+	// name := params.ByName("key")
 	// 调用交易数据查询接口UnionChainReadData
 	qidata := handler.Message{
 		TranCode: "EXP200",

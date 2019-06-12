@@ -154,8 +154,27 @@ func (h *Impl) GetEvent() <-chan sdk.Event {
 	return h.events
 }
 
+// FillHandlerFunc regisnter handler functions in the box
+func (h *Impl) FillHandlerFunc(box FuncBox) error {
+	txHanlers := box.OpenTxHandlerBox()
+	for k, v := range txHanlers {
+		err := h.registerTxHandleFunc(k, v)
+		if err != nil {
+			return err
+		}
+	}
+	srcHandlers := box.OpenSrcHandlerBox()
+	for k, v := range srcHandlers {
+		err := h.registerSrcHandlerFunc(k, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // RegisterTxHandleFunc register TxHandleFunc
-func (h *Impl) RegisterTxHandleFunc(trancode TranCode, handleFunc TxHandleFunc) error {
+func (h *Impl) registerTxHandleFunc(trancode TranCode, handleFunc TxHandleFunc) error {
 	if _, ok := h.txHandlers[trancode]; ok {
 		// already exist
 		return fmt.Errorf("trancode %s already exist", trancode)
@@ -166,7 +185,7 @@ func (h *Impl) RegisterTxHandleFunc(trancode TranCode, handleFunc TxHandleFunc) 
 }
 
 // RegisterSrcHandlerFunc register SrcHandlerFunc
-func (h *Impl) RegisterSrcHandlerFunc(trancode TranCode, handleFunc SrcHandleFunc) error {
+func (h *Impl) registerSrcHandlerFunc(trancode TranCode, handleFunc SrcHandleFunc) error {
 	if _, ok := h.srcHandlers[trancode]; ok {
 		// already exist
 		return fmt.Errorf("trancode %s already exist", trancode)
