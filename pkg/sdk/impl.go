@@ -55,13 +55,21 @@ func NewSDK(configPath string, userCtx UserContext) (*GoSDK, error) {
 }
 
 // Excute chaincode execution
-func (s *GoSDK) Excute(channelID, chaincode, fcn string, args [][]byte) RspMsg {
-	client := s.getClient(channelID)
+// func (s *GoSDK) Excute(channelID, chaincode, fcn string, args [][]byte) RspMsg {
+func (s *GoSDK) Excute(req Request) RspMsg {
+	// client := s.getClient(channelID)
+	// request := channel.Request{
+	// 	ChaincodeID:  chaincode,
+	// 	Fcn:          fcn,
+	// 	Args:         args,
+	// 	TransientMap: nil,
+	// }
+	client := s.getClient(req.Channel)
 	request := channel.Request{
-		ChaincodeID:  chaincode,
-		Fcn:          fcn,
-		Args:         args,
-		TransientMap: nil,
+		ChaincodeID:  req.Chaincode,
+		Fcn:          req.Fcn,
+		Args:         req.Args,
+		TransientMap: req.TransientMap,
 	}
 	response, err := client.Execute(request)
 	rspmsg := RspMsg{
@@ -83,12 +91,20 @@ func (s *GoSDK) Excute(channelID, chaincode, fcn string, args [][]byte) RspMsg {
 }
 
 // Query chaincode query
-func (s *GoSDK) Query(channelID, chaincode, fcn string, args [][]byte) RspMsg {
-	client := s.getClient(channelID)
+// func (s *GoSDK) Query(channelID, chaincode, fcn string, args [][]byte) RspMsg {
+func (s *GoSDK) Query(req Request) RspMsg {
+	// client := s.getClient(channelID)
+	// request := channel.Request{
+	// 	ChaincodeID: chaincode,
+	// 	Fcn:         fcn,
+	// 	Args:        args,
+	// }
+	client := s.getClient(req.Channel)
 	request := channel.Request{
-		ChaincodeID: chaincode,
-		Fcn:         fcn,
-		Args:        args,
+		ChaincodeID:  req.Chaincode,
+		Fcn:          req.Fcn,
+		Args:         req.Args,
+		TransientMap: req.TransientMap,
 	}
 	response, err := client.Query(request)
 	rspmsg := RspMsg{

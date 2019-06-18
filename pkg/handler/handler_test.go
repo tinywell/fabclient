@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/tinywell/fabclient/pkg/sdk"
-	msdk "github.com/tinywell/fabclient/test/mocks/sdk"	
+	msdk "github.com/tinywell/fabclient/test/mocks/sdk"
 )
 
 var (
@@ -46,8 +46,8 @@ func TestGetEvent(t *testing.T) {
 }
 
 func TestFillBox(t *testing.T) {
-	h:=createHandler(t)
-	err :=h.FillHandlerFunc(testBox{})
+	h := createHandler(t)
+	err := h.FillHandlerFunc(testBox{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -61,13 +61,15 @@ func TestHandleMessage(t *testing.T) {
 		Data: []byte("hello programer"),
 		TxID: "TXIDTEST0001",
 	}
-	txHandler.EXPECT().Excute(testChannel, testCC, "savedata", [][]byte{[]byte("hello world")}).Return(rsp1)
+	
+	txHandler.EXPECT().Excute(sdk.Request{Channel: testChannel, Chaincode: testCC, Fcn: "savedata", Args: [][]byte{[]byte("hello world")}}).Return(rsp1)
 	rsp2 := sdk.RspMsg{
 		Code: 200,
 		Data: []byte("hello world"),
 		TxID: "TXIDTEST1001",
 	}
-	txHandler.EXPECT().Query(testChannel, testCC, "readdata", [][]byte{[]byte("TXIDTEST0001")}).Return(rsp2)
+	
+	txHandler.EXPECT().Query(sdk.Request{Channel: testChannel, Chaincode: testCC, Fcn: "readdata", Args: [][]byte{[]byte("TXIDTEST0001")}}).Return(rsp2)
 	srcManager := msdk.NewMockResourceManager(ctl)
 	core := Core{
 		TxHandler:  txHandler,
@@ -90,7 +92,7 @@ func TestHandleMessage(t *testing.T) {
 		TranData: []byte("hello world"),
 		Result:   rstC1,
 	}
-	
+
 	rstC2 := make(chan Result)
 	msg2 := Message{
 		TranCode: "TEST102",
@@ -142,13 +144,12 @@ func createHandler(t *testing.T) *Impl {
 }
 
 type testBox struct {
-
 }
 
-func (box testBox) OpenTxHandlerBox() map[TranCode]TxHandleFunc  {
+func (box testBox) OpenTxHandlerBox() map[TranCode]TxHandleFunc {
 	boxMap := make(map[TranCode]TxHandleFunc)
 	txHF1 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
-		rsp := handler.Excute(testChannel, testCC, "savedata", [][]byte{msg.TranData})
+		rsp := handler.Excute(sdk.Request{Channel: testChannel, Chaincode: testCC, Fcn: "savedata", Args: [][]byte{msg.TranData}})
 		return Result{
 			RspCode:  200,
 			RspData:  rsp.Data,
@@ -156,8 +157,8 @@ func (box testBox) OpenTxHandlerBox() map[TranCode]TxHandleFunc  {
 			TxID:     rsp.TxID,
 		}
 	}
-	txHF2 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {
-		rsp := handler.Query(testChannel, testCC, "readdata", [][]byte{msg.TranData})
+	txHF2 := func(ctx context.Context, msg Message, handler sdk.TxHandler) Result {		
+		rsp := handler.Query(sdk.Request{Channel: testChannel, Chaincode: testCC, Fcn: "readdata", Args: [][]byte{msg.TranData}})
 		return Result{
 			RspCode:  200,
 			RspData:  rsp.Data,
@@ -165,13 +166,12 @@ func (box testBox) OpenTxHandlerBox() map[TranCode]TxHandleFunc  {
 			TxID:     rsp.TxID,
 		}
 	}
-	boxMap[TranCode("TEST002")]=txHF1
-	boxMap[TranCode("TEST102")]=txHF2
+	boxMap[TranCode("TEST002")] = txHF1
+	boxMap[TranCode("TEST102")] = txHF2
 	return boxMap
 }
 
-
-func (box testBox) OpenSrcHandlerBox() map[TranCode]SrcHandleFunc  {
+func (box testBox) OpenSrcHandlerBox() map[TranCode]SrcHandleFunc {
 	boxMap := make(map[TranCode]SrcHandleFunc)
 	return boxMap
 }

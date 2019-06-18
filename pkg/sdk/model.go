@@ -15,3 +15,12 @@ type RspMsg struct {
 	TxID string
 	Data []byte
 }
+
+// Request params for chaincode api
+type Request struct {
+	Channel      string
+	Chaincode    string
+	Fcn          string
+	Args         [][]byte
+	TransientMap map[string][]byte
+}

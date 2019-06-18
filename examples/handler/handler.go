@@ -43,7 +43,9 @@ func (h *ExpHandler) SaveData(ctx context.Context, msg core.Message, handler sdk
 			TranCode: msg.TranCode,
 		}
 	}
-	rspmsg := handler.Excute(h.channel, h.chaincode, "keyadd", [][]byte{[]byte(putkey.Name), []byte(putkey.KeyCert)})
+	req := sdk.Request{Channel: h.channel, Chaincode: h.chaincode, Fcn: "keyadd",
+		Args: [][]byte{[]byte(putkey.Name), []byte(putkey.KeyCert)}}
+	rspmsg := handler.Excute(req)
 	return core.Result{
 		RspCode:  rspmsg.Code,
 		RspData:  rspmsg.Data,
@@ -54,7 +56,9 @@ func (h *ExpHandler) SaveData(ctx context.Context, msg core.Message, handler sdk
 
 // ReadData handler read data,trancode is 'EXP200'
 func (h *ExpHandler) ReadData(ctx context.Context, msg core.Message, handler sdk.TxHandler) core.Result {
-	rspmsg := handler.Query(h.channel, h.chaincode, "keyget", [][]byte{msg.TranData})
+	req := sdk.Request{Channel: h.channel, Chaincode: h.chaincode, Fcn: "keyget",
+		Args: [][]byte{msg.TranData}}
+	rspmsg := handler.Query(req)
 	return core.Result{
 		RspCode:  rspmsg.Code,
 		RspData:  rspmsg.Data,

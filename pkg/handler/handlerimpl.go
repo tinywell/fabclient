@@ -104,6 +104,7 @@ func (h *Impl) handle(msg Message) {
 	switch handlerType {
 	case TypeTxHandler:
 		if h.txHandler == nil {
+			h.doneC <- struct{}{}
 			panic(fmt.Errorf("TxHandler not set"))
 		}
 		hfunc, ok := h.txHandlers[trancode]
@@ -114,6 +115,7 @@ func (h *Impl) handle(msg Message) {
 		rst = hfunc(ctx, msg, h.txHandler)
 	case TypeSrcHandler:
 		if h.srcHandler == nil {
+			h.doneC <- struct{}{}
 			panic(fmt.Errorf("SrcManager not set"))
 		}
 		hfunc, ok := h.srcHandlers[trancode]

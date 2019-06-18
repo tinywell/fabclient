@@ -34,31 +34,31 @@ func (m *MockTxHandler) EXPECT() *MockTxHandlerMockRecorder {
 }
 
 // Excute mocks base method
-func (m *MockTxHandler) Excute(channel, chaincode, fcn string, args [][]byte) sdk.RspMsg {
+func (m *MockTxHandler) Excute(req sdk.Request) sdk.RspMsg {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Excute", channel, chaincode, fcn, args)
+	ret := m.ctrl.Call(m, "Excute", req)
 	ret0, _ := ret[0].(sdk.RspMsg)
 	return ret0
 }
 
 // Excute indicates an expected call of Excute
-func (mr *MockTxHandlerMockRecorder) Excute(channel, chaincode, fcn, args interface{}) *gomock.Call {
+func (mr *MockTxHandlerMockRecorder) Excute(req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Excute", reflect.TypeOf((*MockTxHandler)(nil).Excute), channel, chaincode, fcn, args)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Excute", reflect.TypeOf((*MockTxHandler)(nil).Excute), req)
 }
 
 // Query mocks base method
-func (m *MockTxHandler) Query(channel, chaincode, fcn string, args [][]byte) sdk.RspMsg {
+func (m *MockTxHandler) Query(req sdk.Request) sdk.RspMsg {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Query", channel, chaincode, fcn, args)
+	ret := m.ctrl.Call(m, "Query", req)
 	ret0, _ := ret[0].(sdk.RspMsg)
 	return ret0
 }
 
 // Query indicates an expected call of Query
-func (mr *MockTxHandlerMockRecorder) Query(channel, chaincode, fcn, args interface{}) *gomock.Call {
+func (mr *MockTxHandlerMockRecorder) Query(req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockTxHandler)(nil).Query), channel, chaincode, fcn, args)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockTxHandler)(nil).Query), req)
 }
 
 // RegisterEvent mocks base method
